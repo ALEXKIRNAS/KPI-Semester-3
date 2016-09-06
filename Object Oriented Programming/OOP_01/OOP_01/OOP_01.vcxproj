@@ -87,7 +87,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CRT_SECURE_NO_WARNINGS;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
@@ -149,10 +149,12 @@
     <ClCompile Include="CBlackJack.cpp" />
     <ClCompile Include="CPlayer.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="СDeck.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CBlackJack.h" />
     <ClInclude Include="CPlayer.h" />
+    <ClInclude Include="СDeck.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
