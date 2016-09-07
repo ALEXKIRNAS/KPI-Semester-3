@@ -11,6 +11,7 @@ private:
 	CPlayer* players; // Стан гравців
 	CDeck* deck; // Колода карт
 	bool* out;  // Гравці що покинули гру
+	FILE* log; // Файл логу гри
 
 	int n; // Кількість гравців
 	int k; // Кількість колод
@@ -20,6 +21,7 @@ private:
 	void actionGod(CPlayer&); // Виконання дій ділера
 
 	void whatThisCard(char) const; // Виводить карту на екран
+	void logCard(char) const; // Записує задану карту в лог
 	char costOfCard(char) const; // Визначає ціну карти
 	char playerCostCards(const CPlayer& player) const; // Визначення ціни всіх карт у гравця
 
@@ -28,7 +30,7 @@ private:
 
 public:
 
-	CBlackJack(int, int); // Ініціалізація гри
+	CBlackJack(int, int, FILE*); // Ініціалізація гри
 	~CBlackJack(void); // Очищення гри
 
 	void newGame(void); // Нова гра

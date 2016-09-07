@@ -4,7 +4,7 @@
 // Клас колоди карт
 class CDeck {
 private:
-	int cards[NUM_OF_CARDS]; // Кількість карт кожного типу в колоді
+	int cards[NUM_OF_CARDS + 1]; // Кількість карт кожного типу в колоді
 public:
 	char Rand(void); //Видача випадкової карти
 	CDeck(int k); // Конструктор класу

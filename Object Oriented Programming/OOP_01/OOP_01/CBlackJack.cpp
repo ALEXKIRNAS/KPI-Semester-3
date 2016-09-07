@@ -15,6 +15,21 @@ void CBlackJack::whatThisCard(char card) const {
 	printf("-%c ", char(card % 4 + 'a'));
 }
 
+// Записує задану карту в лог
+void CBlackJack::logCard(char card) const {
+	char number = card / 4 + 2;
+
+	if (number <= 10) fprintf(log, "%d", number);
+	else switch (number) {
+	case 11: fprintf(log, "V"); break;
+	case 12: fprintf(log, "D"); break;
+	case 13: fprintf(log, "K"); break;
+	case 14: fprintf(log, "T"); break;
+	};
+
+	fprintf(log, "-%c ", char(card % 4 + 'a'));
+}
+
 // Визначає ціну карти
 char CBlackJack::costOfCard(char card) const {
 	char number = card / 4 + 2;
@@ -37,10 +52,11 @@ char CBlackJack::playerCostCards(const CPlayer& player) const {
 }
 
 // Ініціалізація гри
-CBlackJack::CBlackJack(int n, int k) {
+CBlackJack::CBlackJack(int n, int k, FILE* log) {
 	this->n = n; this->k = k;
 
 	players = new CPlayer[(n + 1)];
+	this->log = log;
 
 	out = new bool[n + 1];
 	for (int i = 0; i <= n; i++) out[i] = false;
@@ -54,14 +70,29 @@ CBlackJack::~CBlackJack(void) {
 // Нова гра
 void CBlackJack::newGame(void) {
 
-	for (int i = 0; i < n; i++)
-		if (!players[i].giveMoney(COST_OF_GAME)) out[i] = true;
+	fprintf(log, "\n\nStarting new game...\n\n");
+	fprintf(log, "You make new ante %d$ and begin new game\n", COST_OF_GAME);
+	players[0].giveMoney(COST_OF_GAME);
 
+	for (int i = 1; i < n; i++) {
+		if (!players[i].giveMoney(COST_OF_GAME)) out[i] = true;
+		else fprintf(log, "Player %d make ante %d$ and begin new game\n", i, COST_OF_GAME);
+	}
+
+	fprintf(log, "Swaping cards in deck...\n");
 	deck = new CDeck(k);
 
 	for (int i = 0; i < 2; i++) 
-		for (int z = 0; z <= n; z++) //if (!out[z])
-			players[z].addcard(deck->Rand());
+		for (int z = 0; z <= n; z++) if (!out[z]) {
+			char card = deck->Rand();
+
+			if (z != n) fprintf(log, "Adding to player %d card ", i);
+			else fprintf(log, "Adding to dealer сard ");
+			logCard(card);
+			fprintf(log, "\n");
+
+			players[z].addcard(card);
+		}
 }
 
 // Процес гри
@@ -70,12 +101,17 @@ void CBlackJack::playing(void) {
 
 	actionPlayer(players[0]);
 
-	for (int i = 1; i < n; i++)
-		actionAI(players[i]);
+	printf("\n\nActions of other players...\n");
+	fprintf(log, "\n\nActions of other players...\n");
 
+	for (int i = 1; i < n; i++) if(!out[i]) {
+		fprintf(log, "\n\nActions of Player %d:\n", i);
+		actionAI(players[i]);
+	}
+
+	fprintf(log, "\n\nActions of dealer:\n");
 	actionGod(players[n]);
 
-	printf("\n\nActions of other players...\n");
 	printStateAfter();
 	system("pause");
 }
@@ -87,20 +123,25 @@ bool CBlackJack::endingGame(void) {
 	for (int i = 0; i < n; i++) {
 		int playercost = playerCostCards(players[i]);
 
-		if ((playercost == cost && playercost == 21 && players[i].listOfCards().size() == 2) 
-			||  (playercost > cost  && playercost <= 21) || (playercost <= 21 && cost > 21) ) players[i].giveMoney(-2 * COST_OF_GAME);
+		if ((playercost == cost && playercost == 21 && players[i].listOfCards().size() == 2)
+			|| (playercost > cost  && playercost <= 21) || (playercost <= 21 && cost > 21)) {
+			players[i].giveMoney(-2 * COST_OF_GAME);
+			fprintf(log, "\nPlayer %d win %d$", i, COST_OF_GAME * 2);
+		}
 		players[i].clearCards();
 	}
 
 	players[n].clearCards();
 	delete deck;
 
+	fprintf(log, "\n\nEnding of game...");
 	if (players[0].getMoney() < COST_OF_GAME) return 1;
 	return 0;
 }
 
 // Вибір гравцем дій
 void CBlackJack::actionPlayer(CPlayer& player) {
+	fprintf(log, "\nAction of Player 0:\n");
 
 	while (true) {
 		int cost = playerCostCards(player);
@@ -114,8 +155,12 @@ void CBlackJack::actionPlayer(CPlayer& player) {
 		if (*str == 'Y' || *str == 'y') {
 			char card = deck->Rand();
 			player.addcard(card);
-			printf("Added card:");
-			whatThisCard(card);
+
+			fprintf(log, "Added to Player 0 card ");
+			logCard(card); fprintf(log, "\n");
+
+			printf("Added card "); whatThisCard(card);
+
 			printf("\n");
 			system("pause");
 		}
@@ -132,7 +177,11 @@ void CBlackJack::actionAI(CPlayer& player) {
 	int cost = playerCostCards(player);
 
 	while (player.checkChance(deck, players[n].lastCard(), std::max(0, 21 - cost))) {
-		player.addcard(deck->Rand());
+		char card = deck->Rand();
+		player.addcard(card);
+
+		fprintf(log, "Added card ");
+		logCard(card); fprintf(log, "\n");
 		cost = playerCostCards(player);
 	}
 }
@@ -141,8 +190,13 @@ void CBlackJack::actionAI(CPlayer& player) {
 void CBlackJack::actionGod(CPlayer& player) {
 	int cost = playerCostCards(player);
 
-	while (cost < 17 && player.checkChance(deck, players[n].lastCard(), std::max(0, 21 - cost))) {
-		player.addcard(deck->Rand());
+	// Ділер тягне нову карту якщо це вигідно і сума його карт не перебільшує 17
+	while (cost < 17 && player.checkChance(deck, NUM_OF_CARDS, std::max(0, 21 - cost))) {
+		char card = deck->Rand();
+		player.addcard(card);
+
+		fprintf(log, "Added card ");
+		logCard(card); fprintf(log, "\n");
 		cost = playerCostCards(player);
 	}
 }
@@ -158,14 +212,14 @@ void CBlackJack::printStateBefore(void) {
 		else printf("You:\n");
 
 		vector <char> cards = players[i].listOfCards();
-		printf("Money: %d\nCards: ", players[i].getMoney());
+		printf("Money: %d$\nCards: ", players[i].getMoney());
 
 		for (int z = 0, size = cards.size(); z < size; z++) whatThisCard(cards[z]);
 		printf("\nTotal cost: %d", playerCostCards(players[i]));
 		printf("\n\n");
 	}
 
-	printf("God: \n");
+	printf("Dealer: \n");
 	vector <char> cards = players[n].listOfCards();
 
 	for (int z = 0, size = cards.size(); z < (size - 1); z++) whatThisCard(cards[z]);
@@ -192,7 +246,7 @@ void CBlackJack::printStateAfter(void) {
 			|| (playercost > cost  && playercost <= 21) || (playercost <= 21 && cost > 21)) ? "win" : "lose") );
 	}
 
-	printf("God: \n");
+	printf("Dealer: \n");
 	vector <char> cards = players[n].listOfCards();
 
 	for (int z = 0, size = cards.size(); z < size; z++) whatThisCard(cards[z]);

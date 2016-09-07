@@ -1,4 +1,3 @@
-#include "CBlackJack.h"
 #include "Interface.h"
 #include <cstdlib>
 #include <ctime>

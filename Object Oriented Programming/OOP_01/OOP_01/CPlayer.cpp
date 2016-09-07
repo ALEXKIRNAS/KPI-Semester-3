@@ -19,12 +19,13 @@ CPlayer::CPlayer(void) : money(START_MONEY) {}
 // Підрахувати ймовірність вибору "хорошої карти"
 bool CPlayer::checkChance(const CDeck* deck, char hidenCard, char left) {
 
-	int total = deck->countTotal() + 1;
+	int total = deck->countTotal() + 1; // Підрахувати кількість карт, що залишилмся в колоді
 
-	int luck = deck->countLessThat(left);
-	if (hidenCard <= left) luck++;
+	int luck = deck->countLessThat(left); // Підрахувати кількількіть карт, що можна безпечно взяти
+	if (hidenCard <= left) luck++; // Якщо серед безпечних карт є прихована карта ділера, то її потрібно забрати
 
-	if (luck * 3 > total) return true;
+	// Обрати дію виходячи з ймовірності
+	if (luck * 2.75f > total) return true;
 	else return false;
 }
 
