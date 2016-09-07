@@ -19,17 +19,12 @@ CPlayer::CPlayer(void) : money(START_MONEY) {}
 // Підрахувати ймовірність вибору "хорошої карти"
 bool CPlayer::checkChance(const CDeck* deck, char hidenCard, char left) {
 
-	int total = 0;
-	for (int i = 0; i < NUM_OF_CARDS; i++) total += deck->haveMushCards(i);
+	int total = deck->countTotal() + 1;
 
-	int luck = 0;
-	for (int i = 0; i <= left; i++) 
-		luck += deck->haveMushCards(i);
-
-	total++;
+	int luck = deck->countLessThat(left);
 	if (hidenCard <= left) luck++;
 
-	if (luck * 8 > total) return true;
+	if (luck * 3 > total) return true;
 	else return false;
 }
 
@@ -41,4 +36,14 @@ char CPlayer::lastCard(void) const {
 // Повертає список карт
 vector <char> CPlayer::listOfCards(void) const {
 	return cards;
+}
+
+// Забирає всі карти у гравця
+void CPlayer::clearCards(void) {
+	cards.clear();
+}
+
+// Повертає кількість грошей в гравця
+int CPlayer::getMoney(void) const {
+	return money;
 }

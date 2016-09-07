@@ -23,7 +23,8 @@ private:
 	char costOfCard(char) const; // Визначає ціну карти
 	char playerCostCards(const CPlayer& player) const; // Визначення ціни всіх карт у гравця
 
-	void printState(void); // Виведення стану гри
+	void printStateBefore(void); // Виведення стану гри
+	void printStateAfter(void); // Виведення стану гри
 
 public:
 
@@ -32,5 +33,5 @@ public:
 
 	void newGame(void); // Нова гра
 	void playing(void); // Процес гри
-	void endingGame(void); // Завершення гри
+	bool endingGame(void); // Завершення гри
 };

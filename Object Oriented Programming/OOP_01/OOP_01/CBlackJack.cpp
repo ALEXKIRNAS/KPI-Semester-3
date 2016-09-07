@@ -2,7 +2,7 @@
 
 // Виводить карту на екран
 void CBlackJack::whatThisCard(char card) const {
-	char number = card / 4 + 1;
+	char number = card / 4 + 2;
 	
 	if (number <= 10) printf("%d", number);
 	else switch (number) {
@@ -12,16 +12,16 @@ void CBlackJack::whatThisCard(char card) const {
 		case 14: printf("T"); break;
 	};
 
-	printf("%c ", char(card % 4));
+	printf("-%c ", char(card % 4 + 'a'));
 }
 
 // Визначає ціну карти
 char CBlackJack::costOfCard(char card) const {
-	char number = card / 4 + 1;
+	char number = card / 4 + 2;
 
 	if (number <= 10) return number;
 	else if (number != 14) return 10;
-	else return 11;
+	else return 1;
 
 }
 
@@ -40,10 +40,10 @@ char CBlackJack::playerCostCards(const CPlayer& player) const {
 CBlackJack::CBlackJack(int n, int k) {
 	this->n = n; this->k = k;
 
-	players = new CPlayer[(n + 1) * 2];
+	players = new CPlayer[(n + 1)];
 
-	out = new bool[n];
-	for (int i = 0; i < n; i++) out[i] = false;
+	out = new bool[n + 1];
+	for (int i = 0; i <= n; i++) out[i] = false;
 }
 
 // Очищення гри
@@ -59,36 +59,44 @@ void CBlackJack::newGame(void) {
 
 	deck = new CDeck(k);
 
-	for (int i = 0; i < 2; i++)
-		for (int z = 0; z <= n; z++)
+	for (int i = 0; i < 2; i++) 
+		for (int z = 0; z <= n; z++) //if (!out[z])
 			players[z].addcard(deck->Rand());
-
 }
 
 // Процес гри
 void CBlackJack::playing(void) {
-	printState();
+	printStateBefore();
 
 	actionPlayer(players[0]);
 
-	for (int i = 0; i < n; i++)
+	for (int i = 1; i < n; i++)
 		actionAI(players[i]);
 
 	actionGod(players[n]);
 
-	printState();
+	printf("\n\nActions of other players...\n");
+	printStateAfter();
+	system("pause");
 }
 
 // Завершення гри
-void CBlackJack::endingGame(void) {
+bool CBlackJack::endingGame(void) {
 	int cost = playerCostCards(players[n]);
 
 	for (int i = 0; i < n; i++) {
 		int playercost = playerCostCards(players[i]);
 
-		if ((playercost == cost && players[i].listOfCards().size() == 2) || playercost > cost ) players[i].giveMoney(-2 * COST_OF_GAME);
+		if ((playercost == cost && playercost == 21 && players[i].listOfCards().size() == 2) 
+			||  (playercost > cost  && playercost <= 21) || (playercost <= 21 && cost > 21) ) players[i].giveMoney(-2 * COST_OF_GAME);
+		players[i].clearCards();
 	}
 
+	players[n].clearCards();
+	delete deck;
+
+	if (players[0].getMoney() < COST_OF_GAME) return 1;
+	return 0;
 }
 
 // Вибір гравцем дій
@@ -96,13 +104,21 @@ void CBlackJack::actionPlayer(CPlayer& player) {
 
 	while (true) {
 		int cost = playerCostCards(player);
+		if (cost > 21) break;
 
-		printf("\nCurrent cost: %d", cost);
-		printf("\nDo you want new card? (Y\\N)");
+		printf("\nYou current cost: %d", cost);
+		printf("\nDo you want new card? (Y\\N) ");
 		
 		char str[10];
 		scanf("%s", str);
-		if (*str == 'Y' || *str == 'y') player.addcard(deck->Rand());
+		if (*str == 'Y' || *str == 'y') {
+			char card = deck->Rand();
+			player.addcard(card);
+			printf("Added card:");
+			whatThisCard(card);
+			printf("\n");
+			system("pause");
+		}
 		else if (*str == 'n' || *str == 'N') break;
 		else printf("Wrong letter! Try again.\n");
 	}
@@ -125,22 +141,60 @@ void CBlackJack::actionAI(CPlayer& player) {
 void CBlackJack::actionGod(CPlayer& player) {
 	int cost = playerCostCards(player);
 
-	while (cost < 17) {
+	while (cost < 17 && player.checkChance(deck, players[n].lastCard(), std::max(0, 21 - cost))) {
 		player.addcard(deck->Rand());
 		cost = playerCostCards(player);
 	}
 }
 
 // Виведення стану гри
-void CBlackJack::printState(void) {
-	
-	for (int i = 0; i <= n; i++) {
-		printf("%d:\n", i);
+void CBlackJack::printStateBefore(void) {
+	printf("Begin of game status:\n\n");
+
+
+	for (int i = 0; i < n; i++) if(!out[i]){
+
+		if(i) printf("Player %d:\n", i);
+		else printf("You:\n");
+
 		vector <char> cards = players[i].listOfCards();
+		printf("Money: %d\nCards: ", players[i].getMoney());
 
 		for (int z = 0, size = cards.size(); z < size; z++) whatThisCard(cards[z]);
-		printf("%d", playerCostCards(players[i]));
+		printf("\nTotal cost: %d", playerCostCards(players[i]));
 		printf("\n\n");
 	}
 
+	printf("God: \n");
+	vector <char> cards = players[n].listOfCards();
+
+	for (int z = 0, size = cards.size(); z < (size - 1); z++) whatThisCard(cards[z]);
+	printf("*\n\n");
+	//printf("\nTotal cost: %d\n\n", playerCostCards(players[n]));
+
+}
+
+// Виведення стану гри
+void CBlackJack::printStateAfter(void) {
+	printf("End of game status:\n\n");
+	int cost = playerCostCards(players[n]);
+
+	for (int i = 0; i < n; i++) if (!out[i]) {
+		if (i) printf("Player %d:\n", i);
+		else  printf("You:\n");
+
+		vector <char> cards = players[i].listOfCards();
+		int playercost = playerCostCards(players[i]);
+
+		for (int z = 0, size = cards.size(); z < size; z++) whatThisCard(cards[z]);
+		printf("\nTotal cost: %d", playerCostCards(players[i]));
+		printf("\nStatus: %s\n\n", (((playercost == cost && players[i].listOfCards().size() == 2 && playercost == 21)
+			|| (playercost > cost  && playercost <= 21) || (playercost <= 21 && cost > 21)) ? "win" : "lose") );
+	}
+
+	printf("God: \n");
+	vector <char> cards = players[n].listOfCards();
+
+	for (int z = 0, size = cards.size(); z < size; z++) whatThisCard(cards[z]);
+	printf("\nTotal cost: %d\n\n", playerCostCards(players[n]));
 }

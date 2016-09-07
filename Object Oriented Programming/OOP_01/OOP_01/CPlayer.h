@@ -3,7 +3,7 @@
 #include "СDeck.h"
 using std::vector;
 
-#define START_MONEY 10000
+#define START_MONEY 1000
 
 // Клас гравця
 class CPlayer {
@@ -18,4 +18,6 @@ public:
 	bool checkChance(const CDeck*, char, char); // Підрахувати ймовірність вибору "хорошої карти"
 	char lastCard(void) const; // Показує останню зданю карту
 	vector <char> listOfCards(void) const; // Повертає список карт
+	void clearCards(void); // Забирає всі карти у гравця
+	int getMoney(void) const; // Повертає кількість грошей в гравця
 };

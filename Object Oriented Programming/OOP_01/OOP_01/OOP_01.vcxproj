@@ -148,12 +148,14 @@
   <ItemGroup>
     <ClCompile Include="CBlackJack.cpp" />
     <ClCompile Include="CPlayer.cpp" />
+    <ClCompile Include="Interface.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="СDeck.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CBlackJack.h" />
     <ClInclude Include="CPlayer.h" />
+    <ClInclude Include="Interface.h" />
     <ClInclude Include="СDeck.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
