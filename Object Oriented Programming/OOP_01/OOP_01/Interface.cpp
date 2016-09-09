@@ -8,7 +8,7 @@ void input(int& x, int limit, char ch) {
 	printf("Input %c: ", ch);
 
 	scanf("%d", &x);
-	while (x <= 0 || x >= limit) {
+	while (x <= 0 || x > limit) {
 
 		printf("Wrong number! Try again. ");
 		scanf("%d", &x);

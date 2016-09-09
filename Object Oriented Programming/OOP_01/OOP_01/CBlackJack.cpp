@@ -65,6 +65,7 @@ CBlackJack::CBlackJack(int n, int k, FILE* log) {
 // Очищення гри
 CBlackJack::~CBlackJack(void) {
 	delete[] out;
+	delete[] players;
 }
 
 // Нова гра
