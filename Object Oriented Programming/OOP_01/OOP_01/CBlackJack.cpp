@@ -44,11 +44,16 @@ char CBlackJack::costOfCard(char card) const {
 char CBlackJack::playerCostCards(const CPlayer& player) const {
 	int cost = 0;
 	vector <char> cards = player.listOfCards();
+	int y = 0;
 
-	for (int i = 0, size = cards.size(); i < size; i++)
-		cost += costOfCard(cards[i]);
+	for (int i = 0, size = cards.size(); i < size; i++) {
+		int x = costOfCard(cards[i]);
+		if (x == 1) y++;
+		else cost += x;
+	}
 
-	return cost;
+	if (cost + y * 11 <= 21) return cost + y * 11;
+	else return cost + y * 1;
 }
 
 // ²í³ö³àë³çàö³ÿ ãðè

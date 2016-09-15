@@ -39,6 +39,7 @@ void cpyFile(string& from, string& to) {
 		while (in.tellg() > curr * size) {
 			curr++;
 			cout << '.';
+			if (inputed != BLOCK) break;
 		}
 	}
 
