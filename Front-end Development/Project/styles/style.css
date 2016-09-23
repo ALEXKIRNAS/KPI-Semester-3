@@ -1,0 +1,46 @@
+html, body {
+	padding: 0px;
+	margin: 0px;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+}
+
+body:after {
+	font-size: 30px;
+	line-height: 140px;
+	text-align: center;
+	
+	color: rgb(60, 16, 11);
+	background: rgba(255, 255, 255, 0.6);
+	
+	position: absolute;
+	top:50%;
+	left:50%;
+	width: 400px;
+	height: 140px;
+	
+	margin-left: -200px;
+	margin-top: -70px;
+	border-radius: 5px;
+}
+
+body.before-game:after {
+	content: 'Press "Space" to begin game';
+}
+
+body.lose-game:after {
+	content: 'Game Over. Press "Space" to begin  new game';
+}
+
+body.win-game:after {
+	content: 'You win. Press "Space" to begin  new game';
+}
+
+body {
+	background: url(../img/background.jpg) 0 0 repeat;
+}
+
+body.before-game .index {
+	display: block;
+}
