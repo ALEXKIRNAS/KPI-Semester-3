@@ -133,7 +133,7 @@ require(
 	
 	// Стоврюю астероїди
 	var asteroids = [];
-	for ( var i = 0, l = 30; i < l; ++i ){
+	for ( var i = 0, l = 15; i < l; ++i ){
 
 		var ang = 4 * (Math.random() - 0.5) * Math.PI;
 		var r = 700 + 100 * Math.random() + i * 10;
@@ -166,6 +166,9 @@ require(
 	var score = 0;
 	world.subscribe('blow-up', function( data ){
 		score++;
+		
+		var html = 'SCORE: <b>' + score + '</b>';
+		document.getElementById("score").innerHTML = html;
 		
 		var ang = 4 * (Math.random() - 0.5) * Math.PI;
 		var r = 700 + 100 * Math.random() + i * 10;
