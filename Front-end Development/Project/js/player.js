@@ -118,7 +118,8 @@ function(
 					y: this.state.pos.get(1) + r * sin,
 					vx: (0.5 + this.state.vel.get(0)) * cos,
 					vy: (0.5 + this.state.vel.get(1)) * sin,
-					radius: 2
+					radius: 2,
+					mass: 0.00001
 				});
 				
 				laser.state.angular.pos = this.state.angular.pos;

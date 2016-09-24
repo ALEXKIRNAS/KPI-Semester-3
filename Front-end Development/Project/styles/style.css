@@ -26,17 +26,17 @@ body:after {
 }
 
 body.before-game:after {
-	content: 'Press "Space" to begin game';
+	content: 'Press "Enter" to begin game';
 }
 
 body.lose-game:after {
-	content: 'Game Over. Press "Space" to begin  new game';
+	content: 'Game Over. Press "Enter" to begin  new game';
 	z-index: 2;
 	line-height: 150px;
 }
 
 body.win-game:after {
-	content: 'You win. Press "Space" to begin  new game';
+	content: 'You win. Press "Enter" to begin  new game';
 }
 
 body {

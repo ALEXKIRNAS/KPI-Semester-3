@@ -29,9 +29,6 @@ function(
                         case 39: // вправо
                             player.turn( 1 );
                         break;
-                        case 32: // пробіл
-                            player.shoot();
-                        break;
                     }
                     return false;
                 });
@@ -47,6 +44,9 @@ function(
                         break;
                         case 39: // вправо
                             player.turn( 0 );
+                        break;
+						case 32: // пробіл
+                            player.shoot();
                         break;
                     }
                     return false;

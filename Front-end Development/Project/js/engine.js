@@ -47,7 +47,7 @@ require(
   // Добаляємо прослуховування нажати клавіш
   document.addEventListener('keydown', function( e ){
     
-    if (!inGame && e.keyCode === 32){ // 32 - Код пробілу
+    if (!inGame && e.keyCode === 13){ // 13 - Код Enter-у
       document.body.className = 'in-game';
       inGame = true;
       newGame(); // Запуск гри
@@ -67,9 +67,9 @@ require(
 	// Задаєм стилі обєктів
     styles: {
       'circle': { // Для кола
-        strokeStyle: 'rgb(0, 30, 0)',
+        strokeStyle: 'rgb(50, 50, 50)',
         lineWidth: 1,
-        fillStyle: 'rgb(100, 200, 50)',
+        fillStyle: 'rgb(50, 50, 50)',
         angleIndicator: false
       },
       'convex-polygon' : { // Для опуклого багатокутника
@@ -205,7 +205,7 @@ require(
 					world.removeBody(col.bodyA);
 					col.bodyA = undefined;
 				}
-				else {
+				else if(col.bodyB.gameType === 'laser'){
 					world.removeBody(col.bodyB);
 					col.bodyB = undefined;
 				}
@@ -244,7 +244,7 @@ require(
 			lightness = Math.max(Math.min(Math.sqrt(b.mass*10)|0, 100), 10);
 			
 			// Малюю точку
-			renderer.drawCircle(x + d.get(0), y + d.get(1), 1, 'hsl(60, 100%, '+lightness+'%)');
+			if(b.mass >= 0.001)   renderer.drawCircle(x + d.get(0), y + d.get(1), 1, 'hsl(60, 100%, '+lightness+'%)');
 			
 		}
 
