@@ -12,6 +12,10 @@ require(
   'require',
   'physicsjs',
   
+  // Додаткові модулі
+  'js/player',
+  'js/player-behavior',
+  
   // Основні модулі бібліотеки
   'physicsjs/renderers/canvas',
   'physicsjs/bodies/circle',
@@ -84,12 +88,14 @@ require(
     renderer.el.height = par.innerHeight;
   
   // Добавлення космічного корабля
-   var ship = Physics.body('circle', {
+   var ship = Physics.body('player', {
       x: 140,
       y: 100,
       vx: 0.08,
       radius: 30
     });
+	
+	var playerBehavior = Physics.behavior('player-behavior', { player: ship }); // Добавляємо поведінку гравця
     
 	// Опис планети як кола
     var planet = Physics.body('circle', {
@@ -105,12 +111,22 @@ require(
     
     // Рендер на кожній ітерації
     world.on('step', function(){
-      world.render();
+	  
+	  // Середина вікна
+	  var middle = { 
+        x: 0.5 * window.innerWidth, 
+        y: 0.5 * window.innerHeight
+		};
+		
+		// Відслідковуємо дії гравця
+		renderer.options.offset.clone( middle ).vsub( ship.state.pos );
+		world.render();
     });
     
     // Добавляємо обєкти
     world.add([
       ship,
+	  playerBehavior,
       planet,
       Physics.behavior('newtonian', { strength: 1e-4 }), // Ньотонова гравітація (закон обернених квадратів)
       Physics.behavior('sweep-prune'), // алгоритм зіткнень обєктів

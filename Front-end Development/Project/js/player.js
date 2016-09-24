@@ -61,7 +61,7 @@ function(
 			
 			// Поворот корабля шляхом зміни його кутової швидкості
 			turn: function( amount ){
-				this.state.angular.vel = 0.2 * amount * deg; // установка кутової швидкості
+				this.state.angular.vel = 0.1 * amount * deg; // установка кутової швидкості
 				return this;
 			},
 			
@@ -76,7 +76,7 @@ function(
 				var angle = this.state.angular.pos;
 				var scratch = Physics.scratchpad();
 				
-				amount *= 0.1; // Зменшуємо швидкість пресування
+				amount *= 0.0001; // Зменшуємо швидкість пресування
 				
 				// вкразую швидкість прискорення в напрямку носової частини
 				var v = scratch.vector().set(
@@ -128,7 +128,7 @@ function(
 				setTimeout(function(){
 					world.removeBody( laser );
 					laser = undefined;
-					}, 600);
+					}, 10000);
 					
 				world.add( laser );
 				return self;
