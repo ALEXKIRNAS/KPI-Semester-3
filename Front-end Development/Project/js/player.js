@@ -16,7 +16,7 @@ function(
 		var shipImg = new Image();
 		var shipThrustImg = new Image();
 		shipImg.src = require.toUrl('img/ship.png');
-		shipThrustImg.src = require.toUrl('img/ship.png'); //TODO
+		shipThrustImg.src = require.toUrl('img/ship.png');
 		
 		// Незнаю, що тут відбувається, просто СopyPaste з форума
 		
@@ -120,6 +120,11 @@ function(
 					vy: (0.5 + this.state.vel.get(1)) * sin,
 					radius: 2
 				});
+				
+				laser.state.angular.pos = this.state.angular.pos;
+				
+				laser.view = new Image();
+				laser.view.src = require.toUrl('../img/rocket.png');
 				
 				// Встановлюємо властивості для імітації зіткнення
 				laser.gameType = 'laser';

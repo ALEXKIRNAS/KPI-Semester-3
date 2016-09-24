@@ -193,12 +193,62 @@ require(
 			if (col.bodyA.gameType === 'laser' || col.bodyB.gameType === 'laser'){
 				if ( col.bodyA.blowUp ){
 					col.bodyA.blowUp();
+					world.removeBody(col.bodyB);
+					
+					col.bodyB = undefined;
 				} else if ( col.bodyB.blowUp ){
 					col.bodyB.blowUp();
+					world.removeBody(col.bodyA);
+					col.bodyA = undefined;
+				}
+				else if(col.bodyA.gameType === 'laser') {
+					world.removeBody(col.bodyA);
+					col.bodyA = undefined;
+				}
+				else {
+					world.removeBody(col.bodyB);
+					col.bodyB = undefined;
 				}
 				return;
 			}
 		}
+	});
+
+	// Малюємо мінікарту
+	world.subscribe('render', function( data ){
+		// Радіус мінікарти
+		var r = 100;
+		
+		// Відступи
+		var shim = 15;
+		
+		// Координати x,y центра
+		var x = renderer.options.width - r - shim;
+		var y = r + shim;
+		
+		var scratch = Physics.scratchpad();
+		var d = scratch.vector();
+		var lightness;
+		
+		// Малюємо круги на радарі
+		renderer.drawCircle(x, y, r, { strokeStyle: '#090', fillStyle: '#010' });
+		renderer.drawCircle(x, y, r * 2 / 3, { strokeStyle: '#090' });
+		renderer.drawCircle(x, y, r / 3, { strokeStyle: '#090' });
+		
+		for (var i = 0, l = data.bodies.length, b = data.bodies[ i ]; b = data.bodies[ i ]; i++){
+			
+			// Розраховую зміщення тіла відносно корабля
+			d.clone( ship.state.pos ).vsub( b.state.pos ).mult( -0.05 );
+			
+			// Обчислюють колір в залежності від маси
+			lightness = Math.max(Math.min(Math.sqrt(b.mass*10)|0, 100), 10);
+			
+			// Малюю точку
+			renderer.drawCircle(x + d.get(0), y + d.get(1), 1, 'hsl(60, 100%, '+lightness+'%)');
+			
+		}
+
+		scratch.done();
 	});
   };
   

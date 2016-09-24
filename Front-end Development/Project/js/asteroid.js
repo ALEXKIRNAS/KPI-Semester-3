@@ -14,6 +14,7 @@ function(
         ast1.src = require.toUrl('img/asteroid.png');
 
         return {
+			
             init: function( options ){
                 parent.init.call(this, options);
 
@@ -29,9 +30,9 @@ function(
                 var scratch = Physics.scratchpad();
                 var rnd = scratch.vector();
                 var pos = this.state.pos;
-                var n = 20;
+                var n = 5;
                 var r = 2 * this.geometry.radius;
-                var size = r / n;
+                var size = r / n / 2;
                 var mass = 0.001;
                 var d;
                 var debris = [];
