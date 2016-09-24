@@ -15,6 +15,7 @@ require(
   // Додаткові модулі
   'js/player',
   'js/player-behavior',
+  'js/asteroid',
   
   // Основні модулі бібліотеки
   'physicsjs/renderers/canvas',
@@ -33,7 +34,14 @@ require(
 	
   document.body.className = 'before-game'; // Добавляю клас для позначення стану перед грою
   
-  var par = window;
+   var par = parent;
+   
+   try {
+      par && par.innerWidth;
+   } catch( e ){
+      par = window;
+   }
+	
   var inGame = false;
   
   // Добаляємо прослуховування нажати клавіш
@@ -84,12 +92,12 @@ require(
   // Ініціалізація гри
   var init = function init( world, Physics ){
 	  
-	renderer.el.width = par.innerWidth;
-    renderer.el.height = par.innerHeight;
+	//renderer.el.width = par.innerWidth;
+    //renderer.el.height = par.innerHeight;
   
   // Добавлення космічного корабля
    var ship = Physics.body('player', {
-      x: 140,
+      x: 400,
       y: 100,
       vx: 0.08,
       radius: 30
@@ -102,7 +110,7 @@ require(
       mass: 10000,
       radius: 140,
       x: 400,
-      y: 400,
+      y: 300,
     });
 	
 	// Cтворюємо елемент картинка і зберігаємо в властивості view
@@ -110,18 +118,36 @@ require(
     planet.view.src = require.toUrl('./img/planet.png');
     
     // Рендер на кожній ітерації
-    world.on('step', function(){
-	  
-	  // Середина вікна
-	  var middle = { 
-        x: 0.5 * window.innerWidth, 
-        y: 0.5 * window.innerHeight
+    world.subscribe('step', function(){
+		
+		// Середина вікна
+		var middle = { 
+			x: 0.5 * window.innerWidth, 
+			y: 0.5 * window.innerHeight
 		};
 		
-		// Відслідковуємо дії гравця
+		// Відслідковуємо гравця
 		renderer.options.offset.clone( middle ).vsub( ship.state.pos );
 		world.render();
     });
+	
+	// Стоврюю астероїди
+	var asteroids = [];
+	for ( var i = 0, l = 30; i < l; ++i ){
+
+		var ang = 4 * (Math.random() - 0.5) * Math.PI;
+		var r = 700 + 100 * Math.random() + i * 10;
+
+		asteroids.push( Physics.body('asteroid', {
+			x: 400 + Math.cos( ang ) * r,
+			y: 300 + Math.sin( ang ) * r,
+			vx: 0.03 * Math.sin( ang ),
+			vy: - 0.03 * Math.cos( ang ),
+			angularVelocity: (Math.random() - 0.5) * 0.001,
+			radius: 50,
+			mass: 30,
+			restitution: 0.6}));
+	}
     
     // Добавляємо обєкти
     world.add([
@@ -134,6 +160,46 @@ require(
       Physics.behavior('body-impulse-response'), // виконання дій при зітнені обєктів
       renderer
     ]);
+	
+	world.add(asteroids);
+	
+	var score = 0;
+	world.subscribe('blow-up', function( data ){
+		score++;
+		
+		var ang = 4 * (Math.random() - 0.5) * Math.PI;
+		var r = 700 + 100 * Math.random() + i * 10;
+
+		world.add( Physics.body('asteroid', {
+			x: 400 + Math.cos( ang ) * r,
+			y: 300 + Math.sin( ang ) * r,
+			vx: 0.03 * Math.sin( ang ),
+			vy: - 0.03 * Math.cos( ang ),
+			angularVelocity: (Math.random() - 0.5) * 0.001,
+			radius: 50,
+			mass: 30,
+			restitution: 0.6}));
+	});
+
+	// Знищуєм астероїди
+	world.subscribe('collisions:detected', function( data ){
+		var collisions = data.collisions
+			,col
+			;
+
+		for ( var i = 0, l = collisions.length; i < l; ++i ){
+			col = collisions[ i ];
+
+			if (col.bodyA.gameType === 'laser' || col.bodyB.gameType === 'laser'){
+				if ( col.bodyA.blowUp ){
+					col.bodyA.blowUp();
+				} else if ( col.bodyB.blowUp ){
+					col.bodyB.blowUp();
+				}
+				return;
+			}
+		}
+	});
   };
   
   // Реініціалізація сеансу гри
@@ -149,13 +215,13 @@ require(
     world = Physics( init );
 	
 	// Реакція гри на програш гравця
-    world.on('lose-game', function(){
+    world.subscribe('lose-game', function(){
       document.body.className = 'lose-game';
       inGame = false;
     });
 	
 	// Реакція гри на виграш гравця
-    world.on('win-game', function(){
+    world.subscribe('win-game', function(){
       world.pause();
       document.body.className = 'win-game';
       inGame = false;
@@ -163,7 +229,7 @@ require(
   };
   
   // Викликаємо функцію рендеру світу для кожного кадру
-  Physics.util.ticker.on(function( time ){
+  Physics.util.ticker.subscribe(function( time ){
     if (world){
       world.step( time ); 
     }

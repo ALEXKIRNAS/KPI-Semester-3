@@ -8,7 +8,7 @@ html, body {
 
 body:after {
 	font-size: 30px;
-	line-height: 140px;
+	line-height: 150px;
 	text-align: center;
 	
 	color: rgb(60, 16, 11);
@@ -17,11 +17,11 @@ body:after {
 	position: absolute;
 	top:50%;
 	left:50%;
-	width: 400px;
-	height: 140px;
+	width: 600px;
+	height: 150px;
 	
-	margin-left: -200px;
-	margin-top: -70px;
+	margin-left: -300px;
+	margin-top: -75px;
 	border-radius: 5px;
 }
 
@@ -31,6 +31,8 @@ body.before-game:after {
 
 body.lose-game:after {
 	content: 'Game Over. Press "Space" to begin  new game';
+	z-index: 2;
+	line-height: 150px;
 }
 
 body.win-game:after {

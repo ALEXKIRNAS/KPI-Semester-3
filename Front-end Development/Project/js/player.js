@@ -76,7 +76,7 @@ function(
 				var angle = this.state.angular.pos;
 				var scratch = Physics.scratchpad();
 				
-				amount *= 0.0001; // Зменшуємо швидкість пресування
+				amount *= 0.0000009; // Зменшуємо швидкість пресування
 				
 				// вкразую швидкість прискорення в напрямку носової частини
 				var v = scratch.vector().set(
@@ -124,11 +124,11 @@ function(
 				// Встановлюємо властивості для імітації зіткнення
 				laser.gameType = 'laser';
 				
-				// Робимо вистріли через кожні 600 мс
+				// Час за який зникає снаряд 2000 мс
 				setTimeout(function(){
 					world.removeBody( laser );
 					laser = undefined;
-					}, 10000);
+					}, 2000);
 					
 				world.add( laser );
 				return self;

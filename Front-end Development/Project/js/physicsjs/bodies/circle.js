@@ -1,44 +1,31 @@
 /**
- * PhysicsJS v0.7.0 - 2014-12-08
+ * PhysicsJS v0.5.2 - 2013-11-20
  * A modular, extendable, and easy-to-use physics engine for javascript
  * http://wellcaffeinated.net/PhysicsJS
  *
- * Copyright (c) 2014 Jasper Palfree <jasper@wellcaffeinated.net>
+ * Copyright (c) 2013 Jasper Palfree <jasper@wellcaffeinated.net>
  * Licensed MIT
  */
 (function (root, factory) {
-    if (typeof define === 'function' && define.amd) {
-        define(['physicsjs','../geometries/circle'], factory);
-    } else if (typeof exports === 'object') {
-        module.exports = factory.apply(root, ['physicsjs','../geometries/circle'].map(require));
+    var deps = ['physicsjs', '../geometries/circle'];
+    if (typeof exports === 'object') {
+        // Node. 
+        var mods = deps.map(require);
+        module.exports = factory.call(root, mods[ 0 ]);
+    } else if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define(deps, function( p ){ return factory.call(root, p); });
     } else {
-        factory.call(root, root.Physics);
+        // Browser globals (root is window). Dependency management is up to you.
+        root.Physics = factory.call(root, root.Physics);
     }
-}(this, function (Physics) {
+}(this, function ( Physics ) {
     'use strict';
-    /*
+    /**
+     * Circle body definition
+     * @module bodies/circle
      * @requires geometries/circle
      */
-    /** 
-     * class CircleBody < Body
-     *
-     * Physics.body('circle')
-     *
-     * The circle body has a circular shape.
-     *
-     * Additional options include:
-     * - radius: the radius
-     *
-     * Example:
-     *
-     * ```javascript
-     * var round = Physics.body('circle', {
-     *     x: 30,
-     *     y: 20,
-     *     radius: 5
-     * });
-     * ```
-     **/
     Physics.body('circle', function( parent ){
     
         var defaults = {
@@ -47,7 +34,11 @@
     
         return {
     
-            // extended
+            /**
+             * Initialization
+             * @param  {Object} options Configuration options
+             * @return {void}
+             */
             init: function( options ){
     
                 // call parent init method
@@ -62,7 +53,10 @@
                 this.recalc();
             },
     
-            // extended
+            /**
+             * Recalculate properties. Call when body physical properties are changed.
+             * @return {this}
+             */
             recalc: function(){
                 parent.recalc.call(this);
                 // moment of inertia
@@ -73,4 +67,4 @@
     
     // end module: bodies/circle.js
     return Physics;
-}));// UMD
+})); // UMD 

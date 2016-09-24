@@ -23,12 +23,6 @@ function(
                         return;
                     }
                     switch ( e.keyCode ){
-                        case 38: // вверх
-                            self.movePlayer();
-                        break;
-						case 40: // вниз
-							 self.movePlayer( false );
-                        break;
                         case 37: // вліво
                             player.turn( -1 );
                         break;
@@ -48,12 +42,6 @@ function(
                         return;
                     }
                     switch ( e.keyCode ){
-                        case 38: // вверх
-                            self.movePlayer( false );
-                        break;
-						case 40: // вниз
-							 self.movePlayer( false );
-                        break;
                         case 37: // вліво
                             player.turn( 0 );
                         break;
@@ -68,8 +56,8 @@ function(
             // Функція, яка автоматично викликається, коли скріпт підлючаєтсья до світу
             connect: function( world ){
                 // Відслідковуємо події в світі
-                world.on('collisions:detected', this.checkPlayerCollision, this);
-                world.on('integrate:positions', this.behave, this);
+                world.subscribe('collisions:detected', this.checkPlayerCollision, this);
+                world.subscribe('integrate:positions', this.behave, this);
             },
 
             // Функція, яка автоматично викликається, коли скріпт відключається від світу

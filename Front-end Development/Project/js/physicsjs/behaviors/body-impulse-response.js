@@ -1,112 +1,74 @@
 /**
- * PhysicsJS v0.7.0 - 2014-12-08
+ * PhysicsJS v0.5.2 - 2013-11-20
  * A modular, extendable, and easy-to-use physics engine for javascript
  * http://wellcaffeinated.net/PhysicsJS
  *
- * Copyright (c) 2014 Jasper Palfree <jasper@wellcaffeinated.net>
+ * Copyright (c) 2013 Jasper Palfree <jasper@wellcaffeinated.net>
  * Licensed MIT
  */
 (function (root, factory) {
-    if (typeof define === 'function' && define.amd) {
-        define(['physicsjs'], factory);
-    } else if (typeof exports === 'object') {
-        module.exports = factory.apply(root, ['physicsjs'].map(require));
+    var deps = ['physicsjs'];
+    if (typeof exports === 'object') {
+        // Node. 
+        var mods = deps.map(require);
+        module.exports = factory.call(root, mods[ 0 ]);
+    } else if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define(deps, function( p ){ return factory.call(root, p); });
     } else {
-        factory.call(root, root.Physics);
+        // Browser globals (root is window). Dependency management is up to you.
+        root.Physics = factory.call(root, root.Physics);
     }
-}(this, function (Physics) {
+}(this, function ( Physics ) {
     'use strict';
     /**
-     * class BodyImpulseResponseBehavior < Behavior
-     *
-     * `Physics.behavior('body-impulse-response')`.
-     *
-     * Responds to collisions by applying impulses.
-     *
-     * Additional options include:
-     * - check: channel to listen to for collisions (default: `collisions:detected`).
-     * - mtvThreshold: apply partial extraction of bodies if the minimum transit vector is less than this value ( default: `1`)
-     *   this will depend on your simulation characteristic length scale
-     * - bodyExtractDropoff: every body overlap correction (underneith mtvThreshold) will only extract by this fraction (0..1). Helps with stablizing contacts. (default: `0.5`)
-     * - forceWakeupAboveOverlapThreshold: force bodies to wake up if the overlap is above mtvThreshold ( default: `true` )
-     **/
+     * Body collision response
+     * @module behaviors/body-collision-response
+     */
     Physics.behavior('body-impulse-response', function( parent ){
-    
+        
         var defaults = {
-            // channel to listen to for collisions
-            check: 'collisions:detected'
-            // apply partial extraction of bodies if the minimum transit vector is less than this value
-            // this will depend on your simulation characteristic length scale
-            ,mtvThreshold: 1
-            // every body overlap correction (underneith mtvThreshold) will only extract by this fraction (0..1)
-            // helps with stablizing contacts.
-            ,bodyExtractDropoff: 0.5
-            // force bodies to wake up if the overlap is above mtvThreshold
-            ,forceWakeupAboveOverlapThreshold: true
+    
         };
     
-        function getUid( b ){
-            return b.uid;
-        }
-    
-        function clampMTV( totalV, mtv, into ){
-    
-            var m, n;
-            n = mtv.norm();
-            m = n - totalV.proj( mtv );
-            m = Math.max( 0, Math.min( n, m ) );
-    
-            if ( n === 0 ){
-                into.zero();
-            } else {
-                into.clone( mtv ).mult( m/n );
-            }
-    
-            return into;
-        }
+        var PUBSUB_COLLISION = 'collisions:detected';
     
         return {
     
-            // extended
-            init: function( options ){
-    
-                parent.init.call( this );
-                this.options.defaults( defaults );
-                this.options( options );
-    
-                this._bodyList = [];
-            },
-    
-            // no applyTo method
-            applyTo: false,
-    
-            // extended
+            /**
+             * Connect to world. Automatically called when added to world by the setWorld method
+             * @param  {Object} world The world to connect to
+             * @return {void}
+             */
             connect: function( world ){
     
-                world.on( this.options.check, this.respond, this );
+                world.subscribe( PUBSUB_COLLISION, this.respond, this );
             },
     
-            // extended
+            /**
+             * Disconnect from world
+             * @param  {Object} world The world to disconnect from
+             * @return {void}
+             */
             disconnect: function( world ){
     
-                world.off( this.options.check, this.respond, this );
+                world.unsubscribe( PUBSUB_COLLISION, this.respond );
             },
     
-            /** internal
-             * BodyImpulseResponseBehavior#collideBodes( bodyA, bodyB, normal, point, mtrans, contact )
-             * - bodyA (Object): First Body
-             * - bodyB (Object): Second body
-             * - normal (Vector): Normal vector of the collision surface
-             * - point (Vector): Contact point of the collision
-             * - mtrans (Vector): Minimum transit vector that is the smallest displacement to separate the bodies
-             * - contact (Boolean): Are the bodies in resting contact relative to each other
-             *
+            /**
              * Collide two bodies by modifying their positions and velocities to conserve momentum
-             **/
+             * @param  {Object} bodyA   First Body
+             * @param  {Object} bodyB   Second body
+             * @param  {Vector} normal  Normal vector of the collision surface
+             * @param  {Vector} point   Contact point of the collision
+             * @param  {Vector} mtrans  Minimum transit vector that is the smallest displacement to separate the bodies
+             * @param  {Boolean} contact Are the bodies in resting contact relative to each other
+             * @return {void}
+             */
             collideBodies: function(bodyA, bodyB, normal, point, mtrans, contact){
     
-                var fixedA = bodyA.treatment === 'static' || bodyA.treatment === 'kinematic'
-                    ,fixedB = bodyB.treatment === 'static' || bodyB.treatment === 'kinematic'
+                var fixedA = bodyA.fixed
+                    ,fixedB = bodyB.fixed
                     ,scratch = Physics.scratchpad()
                     // minimum transit vector for each body
                     ,mtv = scratch.vector().clone( mtrans )
@@ -118,6 +80,24 @@
                     return;
                 }
     
+                if ( fixedA ){
+    
+                    // extract bodies
+                    bodyB.state.pos.vadd( mtv );
+                    
+                } else if ( fixedB ){
+    
+                    // extract bodies
+                    bodyA.state.pos.vsub( mtv );
+    
+                } else {
+    
+                    // extract bodies
+                    mtv.mult( 0.5 );
+                    bodyA.state.pos.vsub( mtv );
+                    bodyB.state.pos.vadd( mtv );
+                }
+    
                 // inverse masses and moments of inertia.
                 // give fixed bodies infinite mass and moi
                 var invMoiA = fixedA ? 0 : 1 / bodyA.moi
@@ -125,27 +105,25 @@
                     ,invMassA = fixedA ? 0 : 1 / bodyA.mass
                     ,invMassB = fixedB ? 0 : 1 / bodyB.mass
                     // coefficient of restitution between bodies
-                    ,cor = bodyA.restitution * bodyB.restitution
+                    ,cor = contact ? 0 : bodyA.restitution * bodyB.restitution
                     // coefficient of friction between bodies
                     ,cof = bodyA.cof * bodyB.cof
                     // normal vector
                     ,n = scratch.vector().clone( normal )
                     // vector perpendicular to n
-                    ,perp = scratch.vector().clone( n ).perp()
-                    ,tmp = scratch.vector()
+                    ,perp = scratch.vector().clone( n ).perp( true )
                     // collision point from A's center
                     ,rA = scratch.vector().clone( point )
                     // collision point from B's center
-                    ,rB = scratch.vector().clone( point )
-                        .vadd( bodyA.state.pos )
-                        .vsub( bodyB.state.pos )
+                    ,rB = scratch.vector().clone( point ).vadd( bodyA.state.pos ).vsub( bodyB.state.pos )
+                    ,tmp = scratch.vector()
                     ,angVelA = bodyA.state.angular.vel
                     ,angVelB = bodyB.state.angular.vel
                     // relative velocity towards B at collision point
                     ,vAB = scratch.vector().clone( bodyB.state.vel )
-                            .vadd( tmp.clone(rB).perp().mult( angVelB ) )
+                            .vadd( tmp.clone(rB).perp( true ).mult( angVelB ) )
                             .vsub( bodyA.state.vel )
-                            .vsub( tmp.clone(rA).perp().mult( angVelA ) )
+                            .vsub( tmp.clone(rA).perp( true ).mult( angVelA ) )
                     // break up components along normal and perp-normal directions
                     ,rAproj = rA.proj( n )
                     ,rAreg = rA.proj( perp )
@@ -156,36 +134,8 @@
                     ,impulse
                     ,sign
                     ,max
-                    ,ratio
-                    ,inContact = contact
+                    ,inContact = false
                     ;
-    
-                if ( contact ){
-    
-                    if ( fixedA ){
-    
-                        clampMTV( bodyB._mtvTotal, mtv, tmp );
-                        bodyB._mtvTotal.vadd( tmp );
-    
-                    } else if ( fixedB ){
-    
-                        clampMTV( bodyA._mtvTotal, mtv.negate(), tmp );
-                        bodyA._mtvTotal.vadd( tmp );
-                        mtv.negate();
-    
-                    } else {
-    
-                        ratio = 0.5; //bodyA.mass / ( bodyA.mass + bodyB.mass );
-                        mtv.mult( ratio );
-                        clampMTV( bodyB._mtvTotal, mtv, tmp );
-                        bodyB._mtvTotal.vadd( tmp );
-    
-                        mtv.clone( mtrans ).mult( ratio - 1 );
-                        clampMTV( bodyA._mtvTotal, mtv, tmp );
-                        bodyA._mtvTotal.vadd( tmp );
-    
-                    }
-                }
     
                 // if moving away from each other... don't bother.
                 if (vproj >= 0){
@@ -193,20 +143,17 @@
                     return;
                 }
     
-                invMoiA = invMoiA === Infinity ? 0 : invMoiA;
-                invMoiB = invMoiB === Infinity ? 0 : invMoiB;
-    
                 impulse =  - ((1 + cor) * vproj) / ( invMassA + invMassB + (invMoiA * rAreg * rAreg) + (invMoiB * rBreg * rBreg) );
                 // vproj += impulse * ( invMass + (invMoi * rreg * rreg) );
                 // angVel -= impulse * rreg * invMoi;
     
-    
+                
                 if ( fixedA ){
     
                     // apply impulse
                     bodyB.state.vel.vadd( n.mult( impulse * invMassB ) );
                     bodyB.state.angular.vel -= impulse * invMoiB * rBreg;
-    
+                    
                 } else if ( fixedB ){
     
                     // apply impulse
@@ -223,7 +170,7 @@
                 }
     
                 // inContact = (impulse < 0.004);
-    
+                
                 // if we have friction and a relative velocity perpendicular to the normal
                 if ( cof && vreg ){
     
@@ -239,22 +186,28 @@
                     // allowed amount
     
                     // maximum impulse allowed by kinetic friction
-                    max = Math.abs(vreg) / ( invMassA + invMassB + (invMoiA * rAproj * rAproj) + (invMoiB * rBproj * rBproj) );
-                    // the sign of vreg ( plus or minus 1 )
-                    sign = vreg < 0 ? -1 : 1;
+                    max = vreg / ( invMassA + invMassB + (invMoiA * rAproj * rAproj) + (invMoiB * rBproj * rBproj) );
     
-                    // get impulse due to friction
-                    impulse = cof * Math.abs( impulse );
-                    // constrain the impulse within the "friction cone" ( max < mu * impulse)
-                    impulse = Math.min( impulse, max );
-                    impulse *= sign;
+                    if (!inContact){
+                        // the sign of vreg ( plus or minus 1 )
+                        sign = vreg < 0 ? -1 : 1;
+    
+                        // get impulse due to friction
+                        impulse *= sign * cof;
+                        // make sure the impulse isn't giving the system energy
+                        impulse = (sign === 1) ? Math.min( impulse, max ) : Math.max( impulse, max );
+                        
+                    } else {
+    
+                        impulse = max;
+                    }
     
                     if ( fixedA ){
     
                         // apply frictional impulse
                         bodyB.state.vel.vsub( perp.mult( impulse * invMassB ) );
                         bodyB.state.angular.vel -= impulse * invMoiB * rBproj;
-    
+                        
                     } else if ( fixedB ){
     
                         // apply frictional impulse
@@ -268,80 +221,34 @@
                         bodyB.state.angular.vel -= impulse * invMoiB * rBproj;
                         bodyA.state.vel.vadd( perp.mult( invMassA * bodyB.mass ) );
                         bodyA.state.angular.vel += impulse * invMoiA * rAproj;
-                    }
-                }
-    
-                // wake up bodies if necessary
-                if ( bodyA.sleep() ){
-                    bodyA.sleepCheck();
-                }
-                if ( bodyB.sleep() ){
-                    bodyB.sleepCheck();
+                    }  
                 }
     
                 scratch.done();
             },
     
-            // internal
-            _pushUniq: function( body ){
-                var idx = Physics.util.sortedIndex( this._bodyList, body, getUid );
-                if ( this._bodyList[ idx ] !== body ){
-                    this._bodyList.splice( idx, 0, body );
-                }
-            },
-    
-            /** internal
-             * BodyImpulseResponseBehavior#respond( data )
-             * - data (Object): event data
-             *
-             * Event callback to respond to collision data.
-             **/
+            /**
+             * Respond to collision event
+             * @param  {Object} data Event data
+             * @return {void}
+             */
             respond: function( data ){
     
                 var self = this
                     ,col
-                    ,collisions = data.collisions// Physics.util.shuffle(data.collisions)
-                    ,i,l,b
+                    ,collisions = Physics.util.shuffle(data.collisions)
                     ;
     
-                for ( i = 0, l = collisions.length; i < l; ++i ){
-    
+                for ( var i = 0, l = collisions.length; i < l; ++i ){
+                    
                     col = collisions[ i ];
-                    // add bodies to list for later
-                    this._pushUniq( col.bodyA );
-                    this._pushUniq( col.bodyB );
-                    // ensure they have mtv stat vectors
-                    col.bodyA._mtvTotal = col.bodyA._mtvTotal || new Physics.vector();
-                    col.bodyB._mtvTotal = col.bodyB._mtvTotal || new Physics.vector();
-                    col.bodyA._oldmtvTotal = col.bodyA._oldmtvTotal || new Physics.vector();
-                    col.bodyB._oldmtvTotal = col.bodyB._oldmtvTotal || new Physics.vector();
-    
-                    self.collideBodies(
+                    self.collideBodies( 
                         col.bodyA,
                         col.bodyB,
                         col.norm,
                         col.pos,
-                        col.mtv,
-                        col.collidedPreviously
+                        col.mtv
                     );
-                }
-    
-                // apply mtv vectors from the average mtv vector
-                for ( i = 0, l = this._bodyList.length; i < l; ++i ){
-                    b = this._bodyList.pop();
-                    // clampMTV( b._oldmtvTotal, b._mtvTotal, b._mtvTotal );
-    
-                    if ( b._mtvTotal.normSq() < this.options.mtvThreshold ){
-                        b._mtvTotal.mult( this.options.bodyExtractDropoff );
-                    } else if ( this.options.forceWakeupAboveOverlapThreshold ) {
-                        // wake up bodies if necessary
-                        b.sleep( false );
-                    }
-    
-                    b.state.pos.vadd( b._mtvTotal );
-                    b.state.old.pos.vadd( b._mtvTotal );
-                    b._oldmtvTotal.swap( b._mtvTotal );
-                    b._mtvTotal.zero();
                 }
             }
         };
@@ -349,4 +256,4 @@
     
     // end module: behaviors/body-impulse-response.js
     return Physics;
-}));// UMD
+})); // UMD 
