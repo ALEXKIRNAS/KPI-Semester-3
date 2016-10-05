@@ -1,5 +1,6 @@
 #include "СFrustum.h"
 #include <cmath>
+#include <algorithm>
 
 // Конструктор
 CFrustum::CFrustum(pair <double, pair <double, double>> base, pair <double, pair <double, double>> top) : CBaseCircle(base), CTopCircle(top) {
@@ -21,5 +22,6 @@ double CFrustum::getVolume(void) {
 // Розрахувати площу поверхні
 double CFrustum::getSufaceSquare(void) {
 	double generatrix = sqrt(pow(height, 2) + pow((CBaseCircle::getRadius() - CTopCircle::getRadius()), 2));
-	return M_PI * generatrix * (CBaseCircle::getRadius() + CTopCircle::getRadius());
+	if(height != 0) return M_PI * generatrix * (CBaseCircle::getRadius() + CTopCircle::getRadius());
+	else return std::max(CBaseCircle::getSquare(), CTopCircle::getSquare());
 }
