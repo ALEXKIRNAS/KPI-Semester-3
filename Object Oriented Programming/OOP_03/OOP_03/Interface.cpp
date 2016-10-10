@@ -22,6 +22,12 @@ bool outputMenu(void) {
 		pair <int, int> vectorB = inputVector("second");
 		printf("\n");
 
+		if (!(vectorA.first || vectorA.second) || !(vectorB.first || vectorB.second)) {
+			printf("Incorect input data (zero lenth side)!\n");
+			system("pause");
+			return false;
+		}
+
 		CFigure* objects[3] = {
 			new CRomb(vectorA, vectorB),
 			new CSquare(vectorA, vectorB),
