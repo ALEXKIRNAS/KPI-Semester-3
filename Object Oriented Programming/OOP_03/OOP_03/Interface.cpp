@@ -10,14 +10,30 @@
 bool outputMenu(void) {
 
 	system("cls");
-	printf("OOP lab work #2\nVariant - 7, Level - C\nTask: Define figures using polymorphism\nWriter: Alexander ALEXKIRNAS Zarichkovyi\n\n");
+	printf("OOP lab work #3\nVariant - 7, Level - C\nTask: Define figures using polymorphism\nWriter: Alexander ALEXKIRNAS Zarichkovyi\n\n");
 	printf("Menu:\n1. Start program\n2. Exit\n\nMake your choice ");
 
 	int t;
 	scanf("%d", &t);
 	switch (t) {
 	case 1: {
-		
+		pair <int, int> vectorA = inputVector("first");
+		printf("\n");
+		pair <int, int> vectorB = inputVector("second");
+		printf("\n");
+
+		CFigure* objects[3] = {
+			new CRomb(vectorA, vectorB),
+			new CSquare(vectorA, vectorB),
+			new CParallelogram(vectorA, vectorB)
+		};
+
+		printf("Squares:\n");
+		for (int i = 0; i < 3; i++) printf("%d - %.3Lf\n", i + 1, objects[i]->Square());
+
+		printf("\n\nPerimeter:\n");
+		for (int i = 0; i < 3; i++) printf("%d - %.3Lf\n", i + 1, objects[i]->Perimeter());
+		printf("\n\nWhere:\n1 - Romb\n2 - Square\n3 - Parellelogram\n\n");
 
 		system("pause");
 		break;
