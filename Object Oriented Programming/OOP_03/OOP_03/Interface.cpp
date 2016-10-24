@@ -25,7 +25,7 @@ bool outputMenu(void) {
 		if (!(vectorA.first || vectorA.second) || !(vectorB.first || vectorB.second)) {
 			printf("Incorect input data (zero lenth side)!\n");
 			system("pause");
-			return false;
+			return true;
 		}
 
 		CFigure* objects[3] = {
@@ -40,6 +40,8 @@ bool outputMenu(void) {
 		printf("\n\nPerimeter:\n");
 		for (int i = 0; i < 3; i++) printf("%d - %.3Lf\n", i + 1, objects[i]->Perimeter());
 		printf("\n\nWhere:\n1 - Romb\n2 - Square\n3 - Parellelogram\n\n");
+
+		for (int i = 0; i < 3; i++) delete objects[i];
 
 		system("pause");
 		break;
