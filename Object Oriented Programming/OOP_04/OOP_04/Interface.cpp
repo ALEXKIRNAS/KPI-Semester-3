@@ -15,7 +15,9 @@ bool outputMenu(void) {
 	scanf("%d", &t);
 	switch (t) {
 	case 1: {
-		scanf("%c");
+		char c;
+		scanf("%c", &c);
+
 		char* str = inputStr('A');
 		set A(str);
 		delete[] str;

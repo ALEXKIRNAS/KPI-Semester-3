@@ -86,16 +86,16 @@ void set::printSet(void) const {
 
 //Union
 const set set::operator+ (const set &obj) const {
-	set tmp;
-	for (int i = 0, size = sizeof(baseElement) * capacity * 8; i < size; i++)
-		if (cheak(i) || obj.cheak(i)) tmp <<= IndexToChar(i);
+	set tmp = (*this);
+	for (int i = 0; i < capacity; i++)
+		tmp.elements[i] |= obj.elements[i];
 
 	return tmp;
 }
 
 set& set::operator+= (const set &obj) {
-	for (int i = 0, size = sizeof(baseElement) * capacity * 8; i < size; i++)
-		if (cheak(i) || obj.cheak(i)) (*this) <<= IndexToChar(i);
+	for (int i = 0; i < capacity; i++)
+		this->elements[i] |= obj.elements[i];
 
 	return (*this);
 }
@@ -103,15 +103,15 @@ set& set::operator+= (const set &obj) {
 //Difference
 const set set::operator- (const set &obj) const {
 	set tmp(*this);
-	for (int i = 0, size = sizeof(baseElement) * capacity * 8; i < size; i++)
-		if (cheak(i) && obj.cheak(i)) tmp >>= IndexToChar(i);
+	for (int i = 0; i < capacity; i++)
+		tmp.elements[i] ^= this->elements[i] & obj.elements[i];
 
 	return tmp;
 }
 
 set& set::operator-= (const set &obj) {
-	for (int i = 0, size = sizeof(baseElement) * capacity * 8; i < size; i++)
-		if (cheak(i) && obj.cheak(i)) (*this) >>= IndexToChar(i);
+	for (int i = 0; i < capacity; i++)
+		this->elements[i] ^= this->elements[i] & obj.elements[i];
 
 	return (*this);
 }
@@ -119,17 +119,15 @@ set& set::operator-= (const set &obj) {
 //Intersection
 const set set::operator* (const set &obj) const {
 	set tmp;
-	for (int i = 0, size = sizeof(baseElement) * capacity * 8; i < size; i++)
-		if (cheak(i) && obj.cheak(i))
-			tmp <<= IndexToChar(i);
+	for (int i = 0; i < capacity; i++)
+		tmp.elements[i] = this->elements[i] & obj.elements[i];
 
 	return tmp;
 }
 
 set& set::operator*= (const set &obj) {
-	for (int i = 0, size = sizeof(baseElement) * capacity * 8; i < size; i++)
-		if (cheak(i) && !obj.cheak(i))
-			(*this) >>= IndexToChar(i);
+	for (int i = 0; i < capacity; i++)
+		this->elements[i] &= obj.elements[i];
 
 	return (*this);
 }
