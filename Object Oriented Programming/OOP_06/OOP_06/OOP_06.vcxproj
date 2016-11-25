@@ -19,9 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{0F7D6FD5-16FC-4A46-BEFF-02FA83F79C78}</ProjectGuid>
+    <ProjectGuid>{1093106B-1E16-4C2B-83A8-6F459ADF847E}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>OOP_05</RootNamespace>
+    <RootNamespace>OOP_06</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -101,7 +101,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
@@ -146,18 +146,21 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Address.h" />
+    <ClInclude Include="CException.h" />
+    <ClInclude Include="Driver.h" />
+    <ClInclude Include="Interface.h" />
+    <ClInclude Include="Order.h" />
+    <ClInclude Include="TaxiPark.h" />
+    <ClInclude Include="Tiket.h" />
+  </ItemGroup>
+  <ItemGroup>
     <ClCompile Include="CException.cpp" />
+    <ClCompile Include="Driver.cpp" />
     <ClCompile Include="Interface.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="set.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="CException.h" />
-    <ClInclude Include="Interface.h" />
-    <ClInclude Include="set.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="ClassDiagram.cd" />
+    <ClCompile Include="order.cpp" />
+    <ClCompile Include="TaxiPark.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

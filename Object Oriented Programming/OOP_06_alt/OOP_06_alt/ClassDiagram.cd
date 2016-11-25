@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="CException">
+    <Position X="0.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAACAAAAAAAIAAAAAAAAAAAAAAAABAQAAAAAAAA=</HashCode>
+      <FileName>CException.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Driver">
+    <Position X="3.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EgAIBIACAAAAAAAAAAAAgiAAAAAEkEgAAEAMAAAAAAA=</HashCode>
+      <FileName>Driver.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="order">
+    <Position X="6" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEABCAEBAAAAAAAAAAAAAAAIkAAAEAAhAAAgCEkAAEA=</HashCode>
+      <FileName>Order.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TaxiPark">
+    <Position X="0.5" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAFAAQBQAAAAAAQAACAAAAAAAAgAAAAAQAAAACAAAA=</HashCode>
+      <FileName>TaxiPark.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Ticket&lt;...Data&gt;">
+    <Position X="3.5" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Tiket.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Struct Name="address">
+    <Position X="6" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAA=</HashCode>
+      <FileName>Address.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
