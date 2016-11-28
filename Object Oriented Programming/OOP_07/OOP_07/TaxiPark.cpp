@@ -7,6 +7,8 @@
 using std::cout;
 using std::set;
 
+int isOut[1000] = {};
+
 TaxiPark::TaxiPark(Driver* drivers, int sizeDrivers, order* orders, int sizeOrders) {
 	for (int i = 0; i < sizeDrivers; i++) this->drivers.push_back(drivers[i]);
 	for (int i = 0; i < sizeOrders; i++) this->orders.push_back(orders[i]);
@@ -37,6 +39,21 @@ void TaxiPark::wokr(void) {
 
 	while (!Events.empty()) {
 		auto iter = Events.begin();
+
+		if (!isOut[iter->index]) {
+			isOut[iter->index] = 1;
+			cout << iter->time << ": \n\tNew order #" << iter->index + 1 << "\n\tFrom point: " << orders[iter->index].getFrom().x << ", "
+				<< orders[iter->index].getFrom().y << "\n\tTo: " << orders[iter->index].getDest().x << ", " << orders[iter->index].getDest().y << "\n";
+
+			cout << "Free:\n";
+			for (int i = 0; i < drivers.size(); i++) {
+				cout << "Driver " << drivers[i].getName() << " Is free:" << !drivers[i].getIsOnDuty();
+				eventElement event = { drivers[i].getTimeOfEndingOrder() + timeToComplete(i, iter->index) , false, i };
+				cout << "\tTime of complete: " << event.time << "\n";
+			}
+
+			cout << "\n";
+		}
 
 		if (iter->type) {
 			int index = searhBestFree(iter->index);
