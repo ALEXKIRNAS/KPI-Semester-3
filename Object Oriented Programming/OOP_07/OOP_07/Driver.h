@@ -3,13 +3,16 @@
 #include "Order.h"
 #include <vector>
 #include <tuple>
+#include <string>
+
 using std::vector;
 using std::tuple;
+using std::string;
 
 class Driver {
 private:
-	char* name;
-	char* car;
+	string name;
+	string car;
 	vector <tuple <Driver, order>> tikets;
 
 	address curAddr; // Current address
@@ -18,8 +21,7 @@ private:
 public:
 
 	Driver(char* name, char* car);
-	Driver(const Driver& obj);
-	~Driver(void);
+	Driver();
 
 	void addTicket(const tuple<Driver, order>&&  ticket);
 	const vector <tuple<Driver, order>>& getTickets(void);
@@ -30,5 +32,5 @@ public:
 	address getAddr(void);
 	short getTimeOfEndingOrder(void);
 	void setTimeOfEndingOrder(short time);
-	const char* getName(void);
+	const string& getName(void);
 };

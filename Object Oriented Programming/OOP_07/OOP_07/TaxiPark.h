@@ -4,6 +4,7 @@
 #include <vector>
 #include "Order.h"
 #include "Driver.h"
+#include <memory>
 
 using std::vector;
 
@@ -11,6 +12,7 @@ class TaxiPark {
 private:
 	vector <order> orders;
 	vector <Driver> drivers;
+	vector <int> isOut;
 	
 	int searhBestFree(int orderIndex); // Searching best driver for curr order
 	int searhBestOnDuty(int orderIndex); // Searching best driver for curr order
@@ -20,7 +22,7 @@ private:
 
 public:
 	
-	TaxiPark(Driver* drivers, int sizeDrivers, order* orders, int sizeOrders);
+	TaxiPark(Driver* drivers, int sizeDrivers, std::shared_ptr<order>* orders, int sizeOrders);
 	void calcCharge(void);
 	void wokr(void);
 };

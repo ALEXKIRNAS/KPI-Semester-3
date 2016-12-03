@@ -18,6 +18,7 @@ private:
 public:
 	bool operator< (const order& obj) const;
 
+	order(void);
 	order(char* timeOfOrder, address dest, address from, char* phone, short waiting);
 
 	bool getIsCompleted(void);

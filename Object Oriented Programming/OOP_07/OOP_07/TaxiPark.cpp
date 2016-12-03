@@ -7,11 +7,14 @@
 using std::cout;
 using std::set;
 
-int isOut[1000] = {};
+TaxiPark::TaxiPark(Driver* drivers, int sizeDrivers, std::shared_ptr<order>* orders, int sizeOrders) : isOut(sizeOrders, 0) {
+	this->drivers.resize(sizeDrivers);
+	std::copy(drivers, drivers + sizeDrivers, this->drivers.begin());
 
-TaxiPark::TaxiPark(Driver* drivers, int sizeDrivers, order* orders, int sizeOrders) {
-	for (int i = 0; i < sizeDrivers; i++) this->drivers.push_back(drivers[i]);
-	for (int i = 0; i < sizeOrders; i++) this->orders.push_back(orders[i]);
+	std::for_each(orders, orders + sizeOrders, [&](std::shared_ptr<order> elem) {
+		this->orders.push_back(*elem);
+	});
+
 }
 
 void TaxiPark::wokr(void) {
@@ -32,8 +35,11 @@ void TaxiPark::wokr(void) {
 
 	set <eventElement> Events; // type of event  (0 - woker is free, 1 - new order)
 
-	for (int i = 0, size = orders.size(); i < size; i++)
-		Events.insert({ orders[i].getTime(), true, i });
+	int index = 0;
+	std::for_each(orders.begin(), orders.end(), [&Events, &index](order& elem) mutable {
+		Events.insert({ elem.getTime(), true, index });
+		index++;
+	});
 
 	cout << "Start woking:\n\n";
 
@@ -46,11 +52,13 @@ void TaxiPark::wokr(void) {
 				<< orders[iter->index].getFrom().y << "\n\tTo: " << orders[iter->index].getDest().x << ", " << orders[iter->index].getDest().y << "\n";
 
 			cout << "Free:\n";
-			for (int i = 0; i < drivers.size(); i++) {
-				cout << "Driver " << drivers[i].getName() << " Is free:" << !drivers[i].getIsOnDuty();
-				eventElement event = { drivers[i].getTimeOfEndingOrder() + timeToComplete(i, iter->index) , false, i };
+			int i = 0;
+			std::for_each(drivers.begin(), drivers.end(), [&](Driver& elem) {
+				cout << "Driver " << elem.getName() << " Is free:" << !elem.getIsOnDuty();
+				eventElement event = { elem.getTimeOfEndingOrder() + timeToComplete(i, iter->index) , false, i };
 				cout << "\tTime of complete: " << event.time << "\n";
-			}
+				i++;
+			});
 
 			cout << "\n";
 		}
@@ -95,21 +103,28 @@ void TaxiPark::wokr(void) {
 
 int TaxiPark::searhBestFree(int orderIndex) {
 	int index = drivers.size();
-
-	for (int i = 0, size = drivers.size(); i < size; i++)
-		if (!drivers[i].getIsOnDuty() && timeToGet(i, orderIndex) <= orders[orderIndex].getWaiting())
-			if(index == size || timeToGet(i, orderIndex) < timeToGet(index, orderIndex)) index = i;
+	int i = 0;
+		
+	std::for_each(drivers.begin(), drivers.end(), [&](Driver& elem) {
+		if (!elem.getIsOnDuty() && timeToGet(i, orderIndex) <= orders[orderIndex].getWaiting())
+			if (index == drivers.size() || timeToGet(i, orderIndex) < timeToGet(index, orderIndex)) index = i;
+		i++;
+	});
 
 	return index;
 }
 
 int TaxiPark::searhBestOnDuty(int orderIndex) {
 	int index = drivers.size();
+	int i = 0;
 
 	if (index == drivers.size())
-		for (int i = 0, size = drivers.size(); i < size; i++)
-			if (drivers[i].getIsOnDuty() && drivers[i].getTimeOfEndingOrder() + timeToGet(i, orderIndex) <= orders[orderIndex].getWaiting() + orders[orderIndex].getTime())
-				if(index == size || drivers[i].getTimeOfEndingOrder() + timeToGet(i, orderIndex) < drivers[index].getTimeOfEndingOrder() + timeToGet(index, orderIndex)) index = i;
+		std::for_each(drivers.begin(), drivers.end(), [&](Driver elem) {
+			if (elem.getIsOnDuty() && elem.getTimeOfEndingOrder() + timeToGet(i, orderIndex) <= orders[orderIndex].getWaiting() + orders[orderIndex].getTime())
+				if (index == drivers.size() || elem.getTimeOfEndingOrder() + timeToGet(i, orderIndex) < drivers[index].getTimeOfEndingOrder() + timeToGet(index, orderIndex)) index = i;
+			i++;
+		});
+
 	return index;
 }
 
@@ -133,15 +148,16 @@ short TaxiPark::timeToComplete(int indexOfDriver, int indexOfOrder) {
 }
 
 void TaxiPark::calcCharge(void) {
-	for (int i = 0, size = drivers.size(); i < size; i++) {
-		cout << "Driver " << drivers[i].getName() << " charged: ";
+	std::for_each(drivers.begin(), drivers.end(), [&](Driver elem) {
+		cout << "Driver " << elem.getName() << " charged: ";
 		int charge = 0;
 
-		const vector<tuple<Driver, order>>& tikets = drivers[i].getTickets();
+		const vector<tuple<Driver, order>>& tikets = elem.getTickets();
 
-		for (int z = 0; z < tikets.size(); z++)
-			charge += std::get<1>(tikets[z]).getCost();
+		std::for_each(tikets.begin(), tikets.end(), [&charge](const tuple<Driver, order>& elem) {
+			charge += std::get<1>(elem).getCost();
+		});
 
 		cout << charge << "$\n";
-	}
+	});
 }

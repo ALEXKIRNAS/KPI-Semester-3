@@ -7,6 +7,8 @@
 #define timeLenth 5
 #define coefOfCost 5
 
+order::order() {}
+
 order::order(char* timeOfOrder, address dest, address from, char* phone, short waiting) {
 	if (!cheakTime(timeOfOrder)) throw CException("Wrong time input format");
 	else time = atoi(timeOfOrder) * 60 + atoi(timeOfOrder + 3);
